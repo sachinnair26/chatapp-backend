@@ -2,7 +2,8 @@ var http = require('http');
 var url = require('url');
 var saveuser= require('./saveuserdetail.js');
 var getcontacts = require('./getcontacts');
-var socket = require('socket.io')
+var socket = require('socket.io');
+var saveMessage = require('./saveMessage');
 const server = http.createServer((req,res) =>{
     
     const reqUrl = url.parse(req.url,true)
@@ -10,16 +11,19 @@ const server = http.createServer((req,res) =>{
     if(reqUrl.pathname === '/saveuser' && req.method === 'POST'){
         saveuser.saveuserdetail(req,res);
     }else if(reqUrl.pathname === '/home' && req.method === 'GET'){
-        var io = socket.listen(server) 
+        getcontacts.getcontacts(req,res)
+        var io = socket(server,{transports:['polling']}) 
         
         io.on('connect',function(socket) {
             console.log('thenga');
             
-        socket.emit('name',{i:'am'})
+            socket.on('message',function(meg){
+           saveMessage.saveMessage(meg)
+                    
+            })
    
         })
         
-        getcontacts.getcontacts(req,res)
     }
    
     

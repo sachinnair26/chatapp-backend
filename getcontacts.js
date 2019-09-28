@@ -1,12 +1,10 @@
-var mongoCli = require('./constants.js').mongoCli;
-var db_url = require('./constants').db_url;
 var url = require('url')
-
+var mongoconnect = require('./constants').mongoconnect
 module.exports.getcontacts = function(req,res){
     var contacts = {}
     var reqUrl = url.parse(req.url,true)
     
-    mongoCli.connect(db_url,{ useNewUrlParser: true },function(err,db){
+    mongoconnect.then(function(db){
          db.db('test').collection('Data').find({_id:reqUrl.query["_id"]}).forEach(val =>{
             contacts = val["contacts"]
             db.close();
