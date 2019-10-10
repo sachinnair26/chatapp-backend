@@ -1,20 +1,26 @@
 var url = require('url')
 var mongoconnect = require('./constants').mongoconnect
-module.exports.getcontacts = function (req, res) {
+module.exports.getcontacts = function (name) {
+
     var contacts = {}
-    var reqUrl = url.parse(req.url, true)
-
-    mongoconnect.then(function (db) {
-        db.db('test').collection('Data').find({ _id: reqUrl.query["_id"] }).forEach(val => {
-            contacts = val["contacts"]
+    return mongoconnect.then(function (db) {
+        return db.db('test').collection('Data').find({ _id: name }).forEach(val => {
+            contacts[val['_id']] = []
+            val['contacts'].forEach(diff => {
+                diff.mesg.map(wirl => {
+                   return db.db('test').collection('Data').find({ _id: wirl }).forEach(tim => {
+                        contacts[val['_id']].push(tim)
+                    }).then(pint =>{
+                        db.close()
+                    })
+                })
+            })
             db.close();
-
-        }).then(val => {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader("Access-Control-Allow-Origin", "*");
-            res.end(JSON.stringify(contacts));
+        }).then(point => {
+            return contacts
         })
-
+    }).then(echo =>{
+       return echo
+        
     })
 }

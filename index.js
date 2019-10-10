@@ -11,33 +11,38 @@ const server = http.createServer((req, res) => {
 
     if (reqUrl.pathname === '/saveuser' && req.method === 'POST') {
         saveuser.saveuserdetail(req, res);
-    } else if (reqUrl.pathname === '/home' && req.method === 'GET') {
-        getcontacts.getcontacts(req, res)
-        var io = socket(server, { transports: ['polling'] })
+    }
+    var io = socket(server, { transports: ['polling'] })
 
-        io.on('connect', function (socket) {
-            console.log('thenga');
-            socket.on('message', function (meg) {
-                console.log(meg);
+    io.on('connect', function (socket) {
+        console.log('thenga');
+        socket.on('user-name', function (timp) {
+            getcontacts.getcontacts(timp.user_name).then(wish => {
+                socket.emit('save-contact',wish)
 
-                saveMessage.saveMessage(meg)
-            })
-            socket.on('contact-search', function (value) {
-
-                var search_res = []
-                seacrhContact(value).then(point => {
-                    point.forEach(wick => {
-                        search_res.push(wick.user_name)
-                    }).then(tail => {
-                        socket.emit('search-result', search_res)
-                    })
-
-                })
             })
 
         })
+        socket.on('message', function (meg) {
+            console.log(meg);
 
-    }
+            saveMessage.saveMessage(meg)
+        })
+        socket.on('contact-search', function (value) {
+
+            var search_res = []
+            seacrhContact(value).then(point => {
+                point.forEach(wick => {
+                    search_res.push(wick.user_name)
+                }).then(tail => {
+                    socket.emit('search-result', search_res)
+                })
+
+            })
+        })
+
+    })
+
 
 
 
