@@ -17,15 +17,15 @@ const server = http.createServer((req, res) => {
     io.on('connect', function (socket) {
         console.log('thenga');
         socket.on('user-name', function (timp) {
-            getcontacts.getcontacts(timp.user_name).then(wish => {
-                socket.emit('save-contact',wish)
-
+            getcontacts.getcontacts(timp.user_name).then(pint =>{
+                pint.forEach(wish =>{
+                   
+                    
+                       socket.emit('save-contact',wish.contacts)
+                })
             })
-
         })
         socket.on('message', function (meg) {
-            console.log(meg);
-
             saveMessage.saveMessage(meg)
         })
         socket.on('contact-search', function (value) {
