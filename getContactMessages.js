@@ -8,15 +8,25 @@ module.exports = function (name,contact,offset,limit) {
         return db.db('test').collection('Data').aggregate([
             { $match: { _id: name } },
             { $unwind: "$contacts" },
+            {$match:{'contacts.name':contact}},
             {
                 $project: {
+
                     'contacts.mesg': {
                         $cond: { if: { $eq: [[], '$contacts.mesg'] }, then: [ObjectID('5da172a5e75e7b0d6785d555')], else: '$contacts.mesg' }
                     },
                     'contacts.name':'$contacts.name'
                 }
             },
-            { $unwind: "$contacts.mesg" },
+            {
+               
+                    $project: {
+                        'contacts.mesg': { $slice: ['$contacts.mesg', offset, limit] },
+                        'contacts.name': '$contacts.name',
+                    }
+            },
+             { $unwind: "$contacts.mesg" },
+
             {
                 $lookup: {
                     from: "Messages",
@@ -39,7 +49,7 @@ module.exports = function (name,contact,offset,limit) {
             }
 
 
-        ]).limit(10)
+        ])
 
 
     })

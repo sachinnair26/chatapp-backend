@@ -2,6 +2,7 @@ var http = require('http');
 var url = require('url');
 var saveuser = require('./saveuserdetail.js');
 var getContactsName = require('./getContactsName');
+var getContactMessages = require('./getContactMessages');
 var socket = require('socket.io');
 var saveMessage = require('./saveMessage');
 var seacrhContact = require('./searchContact');
@@ -19,9 +20,19 @@ const server = http.createServer((req, res) => {
         socket.on('user-name', function (timp) {
            getContactsName(timp.user_name).then(pint =>{
                 pint.forEach(wish =>{
+                    console.log(wish,"sas");
+                        
                        socket.emit('save-contact',wish.contacts)
                 })
             })
+        })
+        socket.on('fetch-more',function(point){
+                getContactMessages(point.name,point.contact,point.offset,point.limit).then(chakka =>{
+                    chakka.forEach(innge =>{
+                     socket.emit('more-fetched',innge)
+                        
+                    })
+                })
         })
         socket.on('message', function (meg) {
             saveMessage.saveMessage(meg)
