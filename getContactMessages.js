@@ -1,4 +1,3 @@
-var url = require('url')
 var mongoconnect = require('./constants').mongoconnect
 ObjectID = require('mongodb').ObjectID,
 module.exports = function (name,contact,offset,limit) {
@@ -32,19 +31,26 @@ module.exports = function (name,contact,offset,limit) {
                     foreignField: "_id",
                     as: "contacts.mesg"
                 }
-            },{ $unwind: "$contacts.mesg" },{
-                $group:{
-                    _id:'$contacts.name',
-                mesg:{$push:'$contacts.mesg'},
-                'contacts': { $addToSet:{name:'$contacts.name'}}
-
-                }
             },{
-                $set:{
-                    "contacts.mesg":'$mesg',
-                    'mesg':null
-                },
+                $project: {
+                    'mesg': '$contacts.mesg',
+                    'name': '$contacts.name',
+                   
+                }
             }
+            // { $unwind: "$contacts.mesg" },{
+            //     $group:{
+            //         _id:'$contacts.name',
+            //     mesg:{$push:'$contacts.mesg'},
+            //     'contacts': { $addToSet:{name:'$contacts.name'}}
+
+            //     }
+            // },{
+            //     $set:{
+            //         "contacts.mesg":'$mesg',
+            //         'mesg':null
+            //     },
+            // }
 
 
         ])

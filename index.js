@@ -18,6 +18,7 @@ const server = http.createServer((req, res) => {
     io.on('connect', function (socket) {
         console.log('thenga');
         socket.on('user-name', function (timp) {
+            var offset = 0 ,limit =1
            getContactsName(timp.user_name).then(pint =>{
                 pint.forEach(wish =>{
                     

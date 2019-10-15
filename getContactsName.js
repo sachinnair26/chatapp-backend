@@ -1,4 +1,3 @@
-var url = require('url')
 var mongoconnect = require('./constants').mongoconnect
 ObjectID = require('mongodb').ObjectID,
     module.exports = function (name) {
@@ -11,7 +10,7 @@ ObjectID = require('mongodb').ObjectID,
                 {
                     $project: {
                         'contacts.name': '$contacts.name',
-                        'mesg_size':{ $size: "$contacts.mesg" },
+                        'mesg_size': { $size: "$contacts.mesg" },
                         'contacts.mesg': {
                             $cond: { if: { $eq: [[], '$contacts.mesg'] }, then: [ObjectID('5da2a2071219e2106aafe6ef')], else: '$contacts.mesg' },
                         },
@@ -21,7 +20,7 @@ ObjectID = require('mongodb').ObjectID,
                     $project: {
                         'contacts.mesg': { $slice: ['$contacts.mesg', 0, 1] },
                         'contacts.name': '$contacts.name',
-                        'mesg_size':'$mesg_size'
+                        'mesg_size': '$mesg_size'
                     }
                 },
                 { $unwind: "$contacts.mesg" },
@@ -33,21 +32,29 @@ ObjectID = require('mongodb').ObjectID,
                         as: "contacts.mesg"
                     }
                 }
-                , { $unwind: "$contacts.mesg" }, 
-                {
-                    $group: {
-                        _id: '$contacts.name',
-                        mesg: { $push: '$contacts.mesg' },
-                        'contacts': { $addToSet: { name: '$contacts.name' } },
-                        'mesg_size':{$first:'$mesg_size'}
+                , {
+                    $project: {
+                        'mesg': '$contacts.mesg',
+                        'name': '$contacts.name',
+                        "mesg_size": '$mesg_size',
                     }
-                }, 
-                {
-                    $set: {
-                        "contacts.mesg": '$mesg',
-                        'mesg': null
-                    },
                 }
+                // {
+                //     $group: {
+                //         _id: '$contacts.name',
+                //         mesg: { $push: '$contacts.mesg' },
+                //         'name': {$first:'$contacts.name'},
+                //         'mesg_size':{$first:'$mesg_size'}
+                //     }
+                // }, 
+                // {
+                //     $set: {
+                //         "contacts.mesg": '$mesg',
+                //         "contacts.mesg_size":'$mesg_size',
+                //         'mesg': null
+                //     },
+                // },
+                // }
 
 
             ])
