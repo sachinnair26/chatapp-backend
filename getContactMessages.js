@@ -2,8 +2,6 @@ var url = require('url')
 var mongoconnect = require('./constants').mongoconnect
 ObjectID = require('mongodb').ObjectID,
 module.exports = function (name,contact,offset,limit) {
-    var contacts = {}
-
     return mongoconnect.then(function (db) {
         return db.db('test').collection('Data').aggregate([
             { $match: { _id: name } },
@@ -21,7 +19,7 @@ module.exports = function (name,contact,offset,limit) {
             {
                
                     $project: {
-                        'contacts.mesg': { $slice: ['$contacts.mesg', offset, limit] },
+                        'contacts.mesg': { $slice: ['$contacts.mesg', offset, limit+offset] },
                         'contacts.name': '$contacts.name',
                     }
             },

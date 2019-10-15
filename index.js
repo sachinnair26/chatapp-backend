@@ -20,9 +20,8 @@ const server = http.createServer((req, res) => {
         socket.on('user-name', function (timp) {
            getContactsName(timp.user_name).then(pint =>{
                 pint.forEach(wish =>{
-                    console.log(wish,"sas");
-                        
-                       socket.emit('save-contact',wish.contacts)
+                    
+                       socket.emit('save-contact',wish)
                 })
             })
         })
@@ -30,12 +29,13 @@ const server = http.createServer((req, res) => {
                 getContactMessages(point.name,point.contact,point.offset,point.limit).then(chakka =>{
                     chakka.forEach(innge =>{
                      socket.emit('more-fetched',innge)
-                        
+
                     })
                 })
         })
         socket.on('message', function (meg) {
             saveMessage.saveMessage(meg)
+            
         })
         socket.on('contact-search', function (value) {
 
