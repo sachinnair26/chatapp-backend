@@ -18,25 +18,38 @@ const server = http.createServer((req, res) => {
     io.on('connect', function (socket) {
         console.log('thenga');
         socket.on('user-name', function (timp) {
-            var offset = 0 ,limit =1
-           getContactsName(timp.user_name).then(pint =>{
-                pint.forEach(wish =>{
+            var offset = 0; var limit = 10
+            getContactsName(timp.user_name,offset,limit).then(pint => {
+
+                pint.toArray().then(wish => {
+                    console.log(wish);
                     
-                       socket.emit('save-contact',wish)
+                    var contacts = {}
+                    wish.map(point => {
+                        var mesg_size = point.mesg_size
+                        var mesg = point.mesg 
+                          
+                        contacts[point.name] = { mesg, mesg_size }
+
+                    })
+                    return contacts
+                }).then(sake => {
+                    socket.emit('save-contact', sake)
+
                 })
             })
         })
-        socket.on('fetch-more',function(point){
-                getContactMessages(point.name,point.contact,point.offset,point.limit).then(chakka =>{
-                    chakka.forEach(innge =>{
-                     socket.emit('more-fetched',innge)
+        socket.on('fetch-more', function (point) {
+            getContactMessages(point.name, point.contact, point.offset, point.limit).then(chakka => {
+                chakka.forEach(innge => {
+                    socket.emit('more-fetched', innge)
 
-                    })
                 })
+            })
         })
         socket.on('message', function (meg) {
             saveMessage.saveMessage(meg)
-            
+
         })
         socket.on('contact-search', function (value) {
 

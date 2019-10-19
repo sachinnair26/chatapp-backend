@@ -1,6 +1,6 @@
 var mongoconnect = require('./constants').mongoconnect
 ObjectID = require('mongodb').ObjectID,
-    module.exports = function (name) {
+    module.exports = function (name,offset,limit) {
         var contacts = {}
 
         return mongoconnect.then(function (db) {
@@ -14,13 +14,34 @@ ObjectID = require('mongodb').ObjectID,
                         'contacts.mesg': {
                             $cond: { if: { $eq: [[], '$contacts.mesg'] }, then: [ObjectID('5da2a2071219e2106aafe6ef')], else: '$contacts.mesg' },
                         },
+                      
                     },
                 },
                 {
+                    $addFields:{'limit':{
+                        $cond:{if:{$gte:[limit,'$mesg_size']},then:'$mesg_size',else:limit}
+                    },
+                    'offset':offset,
+                }
+                },
+                {
+                    $project:{
+                        'contacts.mesg':'$contacts.mesg',
+                        'contacts.name':'$contacts.name',
+                        'mesg_size':'$mesg_size',
+                       'offset':'$offset',
+                       'limit':'$limit'
+                        
+                    }
+                },
+                {
                     $project: {
-                        'contacts.mesg': { $slice: ['$contacts.mesg', 0, 1] },
+                        'contacts.mesg': { $slice: ['$contacts.mesg', offset,{$cond:{if:{$eq:['$limit',0]},then:1,else:'$limit'}}] },
                         'contacts.name': '$contacts.name',
-                        'mesg_size': '$mesg_size'
+                        'mesg_size': '$mesg_size',
+                        'limit':'$limit',
+                         'offset':'$offset'
+
                     }
                 },
                 { $unwind: "$contacts.mesg" },
@@ -31,30 +52,19 @@ ObjectID = require('mongodb').ObjectID,
                         foreignField: "_id",
                         as: "contacts.mesg"
                     }
-                }
-                , {
-                    $project: {
-                        'mesg': '$contacts.mesg',
-                        'name': '$contacts.name',
-                        "mesg_size": '$mesg_size',
+                },
+                { $unwind: "$contacts.mesg" },
+                {
+                    $group: {
+                        _id: '$contacts.name',
+                        mesg: { $push: '$contacts.mesg' },
+                        'name': {$first:'$contacts.name'},
+                        'mesg_size':{$first:'$mesg_size'},
+                        'limit':{$first:'$limit'},
+                        'offset':{$first:'$offset'}
                     }
-                }
-                // {
-                //     $group: {
-                //         _id: '$contacts.name',
-                //         mesg: { $push: '$contacts.mesg' },
-                //         'name': {$first:'$contacts.name'},
-                //         'mesg_size':{$first:'$mesg_size'}
-                //     }
-                // }, 
-                // {
-                //     $set: {
-                //         "contacts.mesg": '$mesg',
-                //         "contacts.mesg_size":'$mesg_size',
-                //         'mesg': null
-                //     },
-                // },
-                // }
+                }, 
+               
 
 
             ])
